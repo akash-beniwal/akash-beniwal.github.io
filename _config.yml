@@ -1,0 +1,52 @@
+title: Akash Beniwal
+full_name: Akash Kumar Beniwal
+tagline: Applied AI & Software Engineer
+description: >-
+  Portfolio and blog of Akash Beniwal, an Applied AI & Software Engineer
+  building search, AI personalization, and backend systems.
+url: "https://akash-beniwal.github.io"
+baseurl: ""
+
+author: Akash Beniwal
+email: akashbeniwal002@gmail.com
+github_username: akash-beniwal
+linkedin_username: akashbeniwal
+resume_url: "https://drive.google.com/file/d/1Wl0DgAEazilYXwdx7bpTEn505H3aJPr3/view"
+
+markdown: kramdown
+permalink: /blog/:title/
+
+collections:
+  builds:
+    output: true
+    permalink: /builds/:slug/
+
+plugins:
+  - jekyll-feed
+  - jekyll-sitemap
+  - jekyll-seo-tag
+
+defaults:
+  - scope:
+      path: ""
+      type: "posts"
+    values:
+      layout: "post"
+  - scope:
+      path: ""
+      type: "pages"
+    values:
+      layout: "page"
+  - scope:
+      path: ""
+      type: "builds"
+    values:
+      layout: "build"
+      show_in_writing: false
+
+exclude:
+  - Gemfile
+  - Gemfile.lock
+  - README.md
+  - vendor
+  - node_modules
