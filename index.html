@@ -2,13 +2,13 @@
 layout: default
 title: Home
 ---
-<section class="hero">
+<section class="hero hero-big">
   <h1>Hi, I'm Akash.</h1>
   <p class="tagline">
     <strong>{{ site.tagline }}.</strong> A B.Tech graduate from <strong>IIT Roorkee</strong>. I build
     search, AI personalization, LLM-driven workflows, and backend systems that hold up in production.
   </p>
-  <p class="availability">Open to AI and SDE roles</p>
+  <p class="tagline tagline-sub">Open to AI and SDE roles</p>
   <div class="cta">
     <a class="btn" href="{{ '/about/' | relative_url }}">About Me</a>
     <a class="btn" href="{{ site.resume_url }}" target="_blank" rel="noopener">Resume</a>
@@ -21,11 +21,11 @@ title: Home
   </div>
 
   <div class="feature-list">
-    {% for build in site.builds %}
+    {% assign sorted_builds = site.builds | sort: "date" | reverse %}
+    {% for build in sorted_builds %}
     <a class="feature-card tone-{{ build.tone | default: 1 }}" href="{{ build.url | relative_url }}">
       {% if build.eyebrow_tags %}<div class="feature-eyebrow">{{ build.eyebrow_tags }}</div>{% endif %}
       <h3 class="feature-title">{{ build.title }}</h3>
-      {% if build.eyebrow %}<p class="feature-meta">{{ build.eyebrow }}</p>{% endif %}
       <p class="feature-lede">{{ build.excerpt | strip_html }}</p>
       <div class="feature-cta">read the write-up <span class="arrow">&rarr;</span></div>
     </a>
@@ -38,8 +38,8 @@ title: Home
     <h2>Get in touch</h2>
   </div>
   <p class="contact-line">
-    If you're building something with search, retrieval, or LLM-backed systems, I'd like to hear about it.
-    Always up for comparing notes on pgvector, LangChain, or event-driven architecture.
+    If you're building something with RAG, LLM or agent-backed systems? 
+    <br>Want to argue about when a re-ranker actually earns its place in a search pipeline, I'd like to hear about it.
   </p>
   <ul class="contact-links">
     <li><a href="mailto:{{ site.email }}">{{ site.email }}</a></li>

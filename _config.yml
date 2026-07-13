@@ -11,7 +11,7 @@ author: Akash Beniwal
 email: akashbeniwal002@gmail.com
 github_username: akash-beniwal
 linkedin_username: akashbeniwal
-resume_url: "https://drive.google.com/file/d/1Wl0DgAEazilYXwdx7bpTEn505H3aJPr3/view"
+resume_url: "https://drive.google.com/file/d/1oB08eFKyeYhgKyO_GwQm9scAYLroaDn0/view"
 
 markdown: kramdown
 permalink: /blog/:title/
@@ -50,3 +50,4 @@ exclude:
   - README.md
   - vendor
   - node_modules
+  - docs
