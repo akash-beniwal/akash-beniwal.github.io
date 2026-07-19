@@ -2,7 +2,7 @@
   <a class="site-title" href="{{ '/' | relative_url }}">{{ site.title | downcase }}</a>
   <nav class="site-nav">
     <a href="{{ '/' | relative_url }}"{% if page.url == '/' %} class="active"{% endif %}>work</a>
-    <a href="{{ '/blog/' | relative_url }}"{% if page.url == '/blog/' or page.layout == 'post' %} class="active"{% endif %}>writing</a>
+    {% if site.show_writing_nav %}<a href="{{ '/blog/' | relative_url }}"{% if page.url == '/blog/' or page.layout == 'post' %} class="active"{% endif %}>writing</a>{% endif %}
     <a href="{{ '/about/' | relative_url }}"{% if page.url == '/about/' %} class="active"{% endif %}>about</a>
   </nav>
 </header>

@@ -11,7 +11,9 @@ author: Akash Beniwal
 email: akashbeniwal002@gmail.com
 github_username: akash-beniwal
 linkedin_username: akashbeniwal
-resume_url: "https://drive.google.com/file/d/1oB08eFKyeYhgKyO_GwQm9scAYLroaDn0/view"
+resume_url: "https://drive.google.com/file/d/1eP7g6s9m-MuQmvQ55sUVVnPJf2I29J6U/view"
+
+show_writing_nav: false
 
 markdown: kramdown
 permalink: /blog/:title/

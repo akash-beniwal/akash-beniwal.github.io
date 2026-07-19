@@ -5,8 +5,8 @@ tone: 1
 show_in_writing: true
 date: 2026-07-11
 excerpt: >-
-  Keeping a candidate's vector fresh sounds like it should mean constant re-embedding.
-  It gets cheap once you stop guessing what changed and start tracking it.
+  The expensive part of a vector sync pipeline is almost never the embedding call.
+  It's how often you make it, and how often you didn't need to.
 ---
 
 <svg width="0" height="0" style="position: absolute">
@@ -49,7 +49,9 @@ excerpt: >-
 
 A candidate's profile changes constantly: a new skill, a finished certification, an edited work description. Every one of those edits means the vector sitting in the database no longer matches who they actually are.
 
-The real question isn't whether to keep vectors fresh. It's how you know which profiles changed, without checking all of them.
+The real question isn't whether to keep vectors fresh. It's how you know which profiles changed, so you re-embed those and nothing else.
+
+A two-queue architecture solves this, because marking what changed and acting on it can't happen in the same step.
 
 ## Knowing what changed
 
@@ -69,11 +71,13 @@ That queue earns its keep on the cases that aren't obvious. Most changes are dir
 
 A candidate is dirty whenever `last_updated_on` is newer than `last_synced_on`. That single comparison is the entire signal the rest of the pipeline runs on.
 
+So why not embed a candidate the moment it's marked dirty?
+
 ## Draining the dirty set
 
 <p class="flow-line">sync-state queue marks dirty → cron drains every 10 min → embedding queue rebuilds, embeds, upserts</p>
 
-A cron checks that tracking table every 10 minutes. Whatever's dirty gets pushed onto a second queue, the one that actually does the expensive part: rebuild the candidate's text, embed it, upsert the vector into pgvector and mark it synced.
+Because embedding the moment a change lands means every save costs a call, and that restraint is the whole trick. So the marking and the embedding live in different queues. A cron drains the dirty set every 10 minutes, and several edits to the same candidate collapse into one rebuild, embed, and upsert into pgvector.
 
 The trade-off is a 10-minute window where a candidate's vector can be stale. In exchange, someone who can't decide between "Software Engineer" and "Senior Software Engineer" and edits their title four times in five minutes still costs one embedding call, not four, because all four edits are still sitting in the same dirty row when the cron finally runs.
 
@@ -132,9 +136,15 @@ coalesced (drained every 10 min, ~2.5 embeds/candidate):
 
 The dollar figure looks small either way, embedding tokens are just cheap. What actually matters is the call count when it scales: fewer calls means less exposure to rate limits and less queue throughput spent reprocessing text nobody asked to change.
 
-Caching earns its keep in a specific, mechanical case: a sync batch hits a transient failure partway through, a timeout calling OpenAI, a temporary upsert error, and the retry rebuilds the exact same text it already generated an embedding for moments earlier. Without the cache, that retry pays for the same embedding twice. With it, the second attempt is a Redis lookup, not an OpenAI call.
+Caching's real win is the quiet one. Dirty-tracking is coarse: it knows a watched column changed, not whether the embedded text changed. Often it didn't. Three routine edits mark a candidate dirty but rebuild to the exact text already embedded:
 
-That's a narrower win than it sounds: most retries are rare, and most edits do produce genuinely new text. But it's real money saved on exactly the runs that would otherwise cost double for doing the same work twice.
+- a column that only feeds filter metadata, never the document
+- an entry edited beyond the top 5, so it never enters the document
+- a value edited, then reverted before the cron runs
+
+Each becomes a Redis lookup, not an OpenAI call. Dirty-tracking flags what might have changed; the cache catches what didn't.
+
+Retries are the smaller win. A batch fails partway, the retry rebuilds identical text, and the cache spares the duplicate call. Rarer, but real money on the runs that would otherwise pay twice.
 
 ## Proving it, before it went anywhere
 
@@ -148,6 +158,10 @@ That caution carried into the infrastructure too. The HNSW index is created once
 
 ## The one thing to take from this
 
-The expensive version of this pipeline was never the embedding model. It was not knowing what actually changed, and re-processing everything just to be safe.
+The expensive part was never the embedding model, and never really the embedding call. It was making that call more often than the data actually changed.
 
-Watch only what matters, coalesce it, cache it: the cost problem disappears on its own, not because saving money was ever the goal, but because keeping every candidate's vector correct and current was. Cheap is just what that looks like when you're not guessing.
+Watch only what matters, coalesce it, cache it: three ways of not making a call you didn't need. The cost problem disappears on its own, not because saving money was ever the goal, but because keeping every candidate's vector correct and current was. Cheap is just what that looks like when you're not guessing.
+
+---
+
+How are you handling embedding freshness at scale? I'm curious whether people coalesce or just embed on every write. [Let's talk on LinkedIn](https://linkedin.com/in/{{ site.linkedin_username }}){:target="_blank" rel="noopener"}.
